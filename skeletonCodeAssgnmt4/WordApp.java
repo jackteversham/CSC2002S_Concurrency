@@ -34,6 +34,7 @@ public class WordApp {
 	static JLabel caught;
 	static JLabel missed;
 	static JLabel scr;
+	static JButton startB;
 
 
 	public static volatile String text="";
@@ -83,7 +84,7 @@ public class WordApp {
 	    
 	    JPanel b = new JPanel();
         b.setLayout(new BoxLayout(b, BoxLayout.LINE_AXIS)); 
-	   	JButton startB = new JButton("Start");;
+	   	startB = new JButton("Start");;
 		
 			// add the listener to the jbutton to handle the "pressed" event
 			startB.addActionListener(new ActionListener()
@@ -102,7 +103,8 @@ public class WordApp {
 			    {
 			      public void actionPerformed(ActionEvent e)
 			      {
-			    	  endGame();
+
+					  endGame();
 			      }
 			    });
 		
@@ -126,6 +128,7 @@ public class WordApp {
 		caught.setText("Caught: " + score.getCaught() + "    ");
 		missed.setText("Missed:" + score.getMissed()+ "    ");
 		scr.setText("Score:" + score.getScore()+ "    ");
+
 	}
 
 
@@ -183,6 +186,7 @@ public static String[] getDictFromFile(String filename) {
 
 
 	public static void startGame(){
+		startB.setEnabled(false);
 
 		Thread wordThread;
 
@@ -204,6 +208,7 @@ public static String[] getDictFromFile(String filename) {
 	}
 
 	public static void endGame(){
+		startB.setEnabled(true);
 		WordPanel.done = true;
 		score.resetScore();
 		updateGUI();

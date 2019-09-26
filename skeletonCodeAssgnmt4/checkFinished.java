@@ -12,7 +12,6 @@ public class checkFinished implements Runnable {
     public checkFinished(){}
 
     public void run(){
-        System.out.println("STARTED");
         done=false;
 
         while(true){ //check continuously on main thread to see if word limit has been reached, could implement this with another THREAD
