@@ -107,9 +107,20 @@ public class WordApp {
 					  endGame();
 			      }
 			    });
-		
+
+		JButton quitB = new JButton("Quit");
+		quitB.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				System.exit(0);
+			}
+		});
+
+
 		b.add(startB);
 		b.add(endB);
+		b.add(quitB);
 		
 		g.add(b);
     	
