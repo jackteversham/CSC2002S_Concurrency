@@ -9,7 +9,7 @@ public class checkFinished implements Runnable {
 
     public static volatile boolean done;
 
-    public checkFinished(){};
+    public checkFinished(){}
 
     public void run(){
         System.out.println("STARTED");

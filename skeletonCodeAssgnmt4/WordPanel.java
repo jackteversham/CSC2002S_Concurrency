@@ -17,7 +17,8 @@ public class WordPanel extends JPanel implements Runnable {
 	    private int index = 0; //tracks which thread gets which wordRecord. All threads will call this run method at different times
 	                                 //(ensured by a very short delay in the main class) , therefore they will get a different index
 
-		
+
+
 		public void paintComponent(Graphics g) {
 		    int width = getWidth();
 		    int height = getHeight();
@@ -73,14 +74,19 @@ public class WordPanel extends JPanel implements Runnable {
 				}
                 repaint();
 
-
-
 				if(word.dropped()){  //check if word has reached the red zone
 					word.resetWord();
 					WordApp.score.missedWord();
 					WordApp.updateGUI();
 				}
 
+				//check if word has been captured (typed correctly)
+				String text = WordApp.text;
+				if(text.equals(word.getWord())){
+					WordApp.score.caughtWord(word.getWord().length());
+					word.resetWord();
+					WordApp.updateGUI();
+				}
 
 				if (done){ //clear screen and set index to zero to allow for the game to be restarted
 					word.resetWord();

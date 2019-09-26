@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 //model is separate from the view.
 
 public class WordApp {
-//shared variables
+    //shared variables
 	static int noWords=4;
 	static int totalWords;
 
@@ -35,7 +35,8 @@ public class WordApp {
 	static JLabel missed;
 	static JLabel scr;
 
-	public static boolean gameRunning;
+
+	public static volatile String text="";
 
 
 	public static void setupGUI(int frameX,int frameY,int yLimit) {
@@ -69,7 +70,7 @@ public class WordApp {
 	   textEntry.addActionListener(new ActionListener()
          {
 	      public void actionPerformed(ActionEvent evt) {
-	          String text = textEntry.getText();
+	          text = textEntry.getText();
 	          //[snip]
 	          textEntry.setText("");
 	          textEntry.requestFocus();
@@ -89,20 +90,19 @@ public class WordApp {
 		    {
 		      public void actionPerformed(ActionEvent e)
 		      {
-		    	  //[snip]
 				  startGame();
 
 		    	  textEntry.requestFocus();  //return focus to the text entry field
 		      }
 		    });
-		JButton endB = new JButton("End");;
+		JButton endB = new JButton("End");
 			
 				// add the listener to the jbutton to handle the "pressed" event
 				endB.addActionListener(new ActionListener()
 			    {
 			      public void actionPerformed(ActionEvent e)
 			      {
-			    	  //[snip]
+			    	  endGame();
 			      }
 			    });
 		
@@ -122,7 +122,7 @@ public class WordApp {
 
 
 
-	public static void updateGUI(){
+	public static synchronized void updateGUI(){
 		caught.setText("Caught: " + score.getCaught() + "    ");
 		missed.setText("Missed:" + score.getMissed()+ "    ");
 		scr.setText("Score:" + score.getScore()+ "    ");
@@ -175,7 +175,6 @@ public static String[] getDictFromFile(String filename) {
 		
 		setupGUI(frameX, frameY, yLimit);
 
-
 	}
 
 	//Create new thread which takes in wordPanel object which implements run (pass implementer into thread object)
@@ -202,6 +201,12 @@ public static String[] getDictFromFile(String filename) {
 			}
 
 		}
+	}
+
+	public static void endGame(){
+		WordPanel.done = true;
+		score.resetScore();
+		updateGUI();
 	}
 
 }
