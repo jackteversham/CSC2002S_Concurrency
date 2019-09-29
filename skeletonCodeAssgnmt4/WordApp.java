@@ -11,6 +11,7 @@ import java.io.IOException;
 
 import java.util.Scanner;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 //model is separate from the view.
 
 public class WordApp {
@@ -25,7 +26,9 @@ public class WordApp {
 	static WordDictionary dict = new WordDictionary(); //use default dictionary, to read from file eventually
 
 	static WordRecord[] words;
+
 	static volatile boolean done=false;  //must be volatile
+
 	static 	Score score = new Score();
 
 	static WordPanel w;
@@ -35,6 +38,8 @@ public class WordApp {
 	static JLabel missed;
 	static JLabel scr;
 	static JButton startB;
+
+	static AtomicBoolean gamePaused = new AtomicBoolean();
 
 
 	public static volatile String text="";
@@ -84,7 +89,7 @@ public class WordApp {
 	    
 	    JPanel b = new JPanel();
         b.setLayout(new BoxLayout(b, BoxLayout.LINE_AXIS)); 
-	   	startB = new JButton("Start");;
+	   	startB = new JButton("Start");
 		
 			// add the listener to the jbutton to handle the "pressed" event
 			startB.addActionListener(new ActionListener()
@@ -117,8 +122,19 @@ public class WordApp {
 			}
 		});
 
+		JButton pausePlay = new JButton("Pause/Play");
+		pausePlay.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+               gamePaused.set(!gamePaused.get()); //set to opposite of what it was when clicked
+				System.out.println(gamePaused.toString()+"  -----------");
+			}
+		});
+
 
 		b.add(startB);
+		b.add(pausePlay);
 		b.add(endB);
 		b.add(quitB);
 		
@@ -134,7 +150,6 @@ public class WordApp {
 	}
 
 
-
 	public static synchronized void updateGUI(){
 		caught.setText("Caught: " + score.getCaught() + "    ");
 		missed.setText("Missed:" + score.getMissed()+ "    ");
@@ -143,7 +158,6 @@ public class WordApp {
 	}
 
 
-	
 public static String[] getDictFromFile(String filename) {
 		String [] dictStr = null;
 		try {
@@ -191,22 +205,26 @@ public static String[] getDictFromFile(String filename) {
 
 	}
 
-	//Create new thread which takes in wordPanel object which implements run (pass implementer into thread object)
-	//calling start on thread invokes the run implementation in the wordPanel class
-	//note that a static wordPanel has been declared above - this resource is going to be shared!
 
+
+	/**
+	 * Create new thread which takes in wordPanel object which implements run (pass implementer into thread object)
+	 calling start on thread invokes the run implementation in the wordPanel class
+	 note that a static wordPanel has been declared above - this resource is going to be shared!
+	 */
 
 	public static void startGame(){
+		gamePaused.set(false);
 		startB.setEnabled(false);
 
 		Thread wordThread;
 
-		Thread finishedCheckingThread = new Thread(checkfinished);
-		finishedCheckingThread.start();
+		Thread finishedCheckingThread = new Thread(checkfinished); //create new thread, taking in checkFinished object as argument
+		finishedCheckingThread.start(); //send the thread off to do its work
 
 		done = false;
 
-		for (int i = 0; i < noWords ; i++) {
+		for (int i = 0; i < noWords; i++) {
 			wordThread = new Thread(w);
 			wordThread.start(); //start thread for each word in a loop
 			try{
@@ -219,6 +237,7 @@ public static String[] getDictFromFile(String filename) {
 	}
 
 	public static void endGame(){
+		gamePaused.set(false);
 		startB.setEnabled(true);
 		WordPanel.done = true;
 		score.resetScore();

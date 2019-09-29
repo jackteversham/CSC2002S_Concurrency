@@ -6,17 +6,18 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.*;
 
 public class WordPanel extends JPanel implements Runnable {
+
 		public static volatile boolean done;
 		private WordRecord[] words;
 		private int noWords;
 		private int maxY;
-	    private int index = 0; //tracks which thread gets which wordRecord. All threads will call this run method at different times
+	    private AtomicInteger index=new AtomicInteger(); //tracks which thread gets which wordRecord. All threads will call this run method at different times
 	                                 //(ensured by a very short delay in the main class) , therefore they will get a different index
-
 
 
 		public void paintComponent(Graphics g) {
@@ -51,49 +52,65 @@ public class WordPanel extends JPanel implements Runnable {
 
 		public void run() {
 			//add in code to animate this
-            done = false;
-			WordRecord word = words[index];
+			done = false;
+			WordRecord word = words[index.get()];
 			System.out.println(word.getWord());
-			index+=1;
+			index.getAndIncrement();
 
-			while(!done){  //continue to animate and check for matching word until done.
 
-				if(WordApp.score.getMissed()==WordApp.totalWords){ //check if total number of allowed words have dropped
-					done=true;
-					checkFinished.done=true; //set this to true to show the JOptionPane alert (once and not for every thread
-					word.resetWord(); //clear screen effectively and reset
+			while (!done) {  //continue to animate and check for matching word until done.
+
+				while (!WordApp.gamePaused.get()) { //while game isn't paused
+
+					if (WordApp.score.getTotal() == WordApp.totalWords) { //check if total number of allowed words have dropped
+						done = true;
+						checkFinished.done = true; //set this to true to show the JOptionPane alert (once and not for every thread
+						word.resetWord(); //clear screen effectively and reset
+						break;
+					}
+
+
+					//ANIMATION
+					word.drop(10);
+					try {
+						Thread.sleep(word.getSpeed());
+					} catch (InterruptedException ex) {
+						ex.printStackTrace();
+					}
+
+					repaint();
+
+					if (word.dropped()) {  //check if word has reached the red zone
+
+						WordApp.score.missedWord();
+						word.resetWord();
+						WordApp.updateGUI();
+					}
+
+					//check if word has been captured (typed correctly)
+					String text = WordApp.text;
+					if (text.equals(word.getWord())) {
+						WordApp.score.caughtWord(word.getWord().length());
+						word.resetWord();
+						WordApp.updateGUI();
+					}
+
+					if (done) { //clear screen and set index to zero to allow for the game to be restarted
+						word.resetWord();
+						index.getAndSet(0);
+						break;
+					}
+
+
+				}
+
+				if (done) { //clear screen and set index to zero to allow for the game to be restarted
+					word.resetWord();
+					index.getAndSet(0);
 					break;
 				}
 
-				//ANIMATION
-				word.drop(10);
-				try{
-					Thread.sleep(word.getSpeed());
-				}catch(InterruptedException ex){
-					ex.printStackTrace();
-				}
-                repaint();
-
-				if(word.dropped()){  //check if word has reached the red zone
-					word.resetWord();
-					WordApp.score.missedWord();
-					WordApp.updateGUI();
-				}
-
-				//check if word has been captured (typed correctly)
-				String text = WordApp.text;
-				if(text.equals(word.getWord())){
-					WordApp.score.caughtWord(word.getWord().length());
-					word.resetWord();
-					WordApp.updateGUI();
-				}
-
-				if (done){ //clear screen and set index to zero to allow for the game to be restarted
-					word.resetWord();
-					index=0;
-				}
 			}
-
 		}
 
 	}
