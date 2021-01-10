@@ -1,3 +1,9 @@
+#Falling Word Concurrency Game
+
+This game provides a GUI in which words fall concurrently from the top of the display to the bottom at different speeds. When they touch the bottom they disappear
+and the number of words missed is incremented. If a word on the screen is typed correctly in the field before reaching the bottom of the display, the number of
+words caught is incremented -- the aim of the game being to catch more words than are missed, up to a specified maximum number of total words in the game.
+
 Notes on how to run this code:
 
 1. cd into src directory (location of the makefile)
