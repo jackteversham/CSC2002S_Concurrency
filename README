@@ -1,0 +1,13 @@
+Notes on how to run this code:
+
+1. cd into src directory (location of the makefile)
+2. run the command 'make' to compile the code.
+3. cd into the bin directory
+4. run the command 'java -classpath . skeletonCodeAssgnmt4.WordApp 10 5 example_dict.txt'
+     - 10 represents the first command line paramter - maximum number of words to be caught/missed
+     - 5 represents the second command line parameter - number of words visible on the screen
+     - example_dict.txt represents the third command line paramter - the input text file
+
+Email me @ jacktevers@gmail.com if you have any issues.
+Thanks!
+Jack
